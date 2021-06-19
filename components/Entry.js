@@ -2,10 +2,8 @@ import { useState } from "react";
 
 const Entry = ({ init }) => {
 
-    const { description } = init;
-
     //States
-    const [entryState, setEntryState] = useState(description);
+    const [entryState, setEntryState] = useState(init);
 
     //Handlers
     const onChangeHandler = (e) => {

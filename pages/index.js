@@ -1,40 +1,22 @@
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import Head from 'next/head';
+import { useRouter } from "next/router";
 
-//Components
-import Entry from "../components/Entry";
+//Redux
+import { useDispatch } from "react-redux";
+//Reducers
+import { getUser } from "../store/actions/user";
 
 const Index = () => {
-  const [user, setUser] = useState(null);
-  const [problemData, setProblemData] = useState({ description: "none" });
+  const dispatch = useDispatch();
+
+  const router = useRouter();
+
   const [email, setEmai] = useState();
   const [password, setPassword] = useState();
 
-  //API calls
-  const fetchUserEntries = async (userId) => {
-    try {
-      console.log(userId);
-      const response = await fetch("http://localhost:5000/" + "user/entries/" + userId, {
-        headers: {
-          "Authorization": "Bearer " + user.token,
-          "Content-Type" : "application/json",
-        },
-      });
-
-      if (!response.ok) {
-        return { description: "error" };
-      } else {
-        const resData = await response.json();
-        return resData;
-      }
-
-    } catch (err) {
-      throw err;
-    }
-  };
-
   //Handlers
-  const loginHandler = async () => {
+  const loginHandler = async (e, path) => {
     try {
       const response = await fetch("http://localhost:5000/" + "user/login", {
         method: "POST",
@@ -54,19 +36,21 @@ const Index = () => {
       } else {
         const resData = await response.json();
 
-        setUser(resData);
-
-        let entries = fetchUserEntries(resData.result._id);
-
-        setProblemData(entries.filter(entry => entry.category === "problem"));
+        dispatch(getUser(resData.token, resData.result));
 
         localStorage.setItem("authData", resData.token);
-        
+
         alert("Successfuly logged in");
+
+        router.push("/dashboard");
       }
     } catch (err) {
       throw err;
     }
+  };
+
+  const guestHandler = () => {
+    alert("Working on guest");
   };
 
   return (
@@ -79,22 +63,9 @@ const Index = () => {
       <input onChange={(e) => setEmai(e.target.value)}/>
       <input onChange={(e) => setPassword(e.target.value)}/>
       <button onClick={loginHandler}>Login</button>
-
-      <Entry 
-        init={problemData}
-      />
+      <button onClick={guestHandler}>Continue as guest</button>
     </div>
   )
-}
-
-export const getStaticProps = () => {
-  return {
-    props: {
-      problemData: {
-        description: "none"
-      }
-    }
-  };
 }
 
 export default Index;

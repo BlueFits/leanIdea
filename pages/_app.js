@@ -1,7 +1,19 @@
-import '../styles/globals.css'
+import '../styles/globals.css';
+import { createStore, combineReducers } from "redux";
+import { Provider } from "react-redux";
 
-function MyApp({ Component, pageProps }) {
-  return <Component {...pageProps} />
-}
+import userReducer from "../store/reducers/user";
 
-export default MyApp
+const rootReducer = combineReducers({ 
+  userReducer,
+});
+
+const store = createStore(rootReducer);
+
+export default function MyApp({ Component, pageProps }) {
+  return (
+    <Provider store={store}>
+      <Component {...pageProps} />
+    </Provider>
+  )
+};
