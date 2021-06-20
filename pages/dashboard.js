@@ -1,5 +1,8 @@
 import { useEffect, useState } from "react";
 
+//Server
+import Server from "../config/Server";
+
 //Redux
 import { useSelector } from "react-redux";
 
@@ -7,19 +10,17 @@ const dashBoard = () => {
     const session = useSelector(state => state.userReducer);
 
     const [problemText, setProblemText] = useState("");
-    const [problemData, setProblemData] = useState([
-        {description: "hello"},
-        {description: "salut"}
-    ]);
+    const [problemData, setProblemData] = useState([]);
 
     useEffect(async () => {
-        console.log(session);
-        if (session.token) {
+        let token = localStorage.getItem("authToken");
+        let userId = localStorage.getItem("authId");
 
-            const response = await fetch("http://localhost:5000/user/entries/" + session.user._id, {
+        if (token) {
+            const response = await fetch(Server + "user/entries/" + userId, {
                 method: "GET",
                 headers: {
-                    "Authorization": "Bearer " + session.token,
+                    "Authorization": "Bearer " + token,
                     "Content-Type" : "application/json",
                     'Accept': 'application/json',
                 },
@@ -30,27 +31,75 @@ const dashBoard = () => {
                 console.log(errData);
             } else {
                 const resData = await response.json();
-                // setProblemData(resData);
+                setProblemData(resData);
             }
 
         }
     }, []);
 
-    const addEntryHandler = () => {
-        let problemUpdate = [...problemData, { description: problemText }];
+    const addEntryHandler = async (category) => {
         setProblemText("");
-        setProblemData(problemUpdate);
+
+        const response = await fetch(Server+ "add_entry", {
+            method: "POST",
+            headers: {
+                "Content-Type" : "application/json",
+                'Accept': 'application/json',
+            },
+            body: JSON.stringify({
+                title: "test",
+                category,
+                description: problemText,
+                userId: localStorage.getItem("authId"),
+            })
+        });
+
+        const resData = await response.json();
+
+        setProblemData([...problemData, resData]);
+    };
+
+    const removeEntryHandler = async (entryId) => {
+        try {
+            const update = problemData.filter((entry) => {
+                if (entry._id !== entryId) {
+                    return entry;
+                }
+            });
+    
+            setProblemData(update);
+    
+            await fetch(Server + "util/remove_entry", {
+                method: "POST",
+                headers: {
+                    "Content-Type" : "application/json",
+                    'Accept': 'application/json',
+                },
+                body: JSON.stringify({
+                    entryId,
+                }),
+            });
+
+
+        } catch(err) {
+            throw err;
+        }
     };
 
     return (
         <div>
             <ul>
                 {problemData.map((item, index) => {
-                    return <li key={"key " + index}>{item.description}</li>
+                    return (
+                        <li key={"key " +index + ": "  + item._id}>
+                            <span>{item.description}</span>
+                            <button onClick={removeEntryHandler.bind(this, item._id)}>close</button>
+                        </li>
+                    )
                 })}
             </ul>
             <textarea onChange={(e) => setProblemText(e.target.value)} value={problemText}></textarea>
-            <button onClick={addEntryHandler}>Add</button>
+            <button onClick={addEntryHandler.bind(this, "problem")}>Add</button>
         </div>
     );
 };

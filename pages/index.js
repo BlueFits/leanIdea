@@ -2,6 +2,9 @@ import { useState } from "react";
 import Head from 'next/head';
 import { useRouter } from "next/router";
 
+//Server
+import Server from "../config/Server";
+
 //Redux
 import { useDispatch } from "react-redux";
 //Reducers
@@ -18,7 +21,7 @@ const Index = () => {
   //Handlers
   const loginHandler = async (e, path) => {
     try {
-      const response = await fetch("http://localhost:5000/" + "user/login", {
+      const response = await fetch(Server + "user/login", {
         method: "POST",
         headers: {
           'Accept': 'application/json',
@@ -38,7 +41,8 @@ const Index = () => {
 
         dispatch(getUser(resData.token, resData.result));
 
-        localStorage.setItem("authData", resData.token);
+        localStorage.setItem("authToken", resData.token);
+        localStorage.setItem("authId", resData.result._id);
 
         alert("Successfuly logged in");
 
