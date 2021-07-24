@@ -1,6 +1,6 @@
 const servers = {
     development: "http://localhost:5000/",
-    production: "https://leanideabackend.herokuapp.com/",
+    production: "https://leanideaapi.herokuapp.com/",
 };
 
-export default servers.development;
+export default servers.production;

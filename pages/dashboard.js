@@ -1,23 +1,16 @@
 import { useEffect, useState } from "react";
-
-//Server
 import Server from "../config/Server";
-
-//Redux
 import { useSelector } from "react-redux";
 
 const dashBoard = () => {
-    const session = useSelector(state => state.userReducer);
-
+    const userData = useSelector(state => state.user);
     const [problemText, setProblemText] = useState("");
     const [problemData, setProblemData] = useState([]);
 
     useEffect(async () => {
-        let token = localStorage.getItem("authToken");
-        let userId = localStorage.getItem("authId");
-
+        const { token, user } = userData;
         if (token) {
-            const response = await fetch(Server + "user/entries/" + userId, {
+            const response = await fetch(Server + "user/entries/" + user._id, {
                 method: "GET",
                 headers: {
                     "Authorization": "Bearer " + token,
@@ -25,7 +18,6 @@ const dashBoard = () => {
                     'Accept': 'application/json',
                 },
             });
-
             if (!response.ok) {
                 const errData = await response.json();
                 console.log(errData);
@@ -33,13 +25,11 @@ const dashBoard = () => {
                 const resData = await response.json();
                 setProblemData(resData);
             }
-
         }
     }, []);
 
     const addEntryHandler = async (category) => {
         setProblemText("");
-
         const response = await fetch(Server+ "add_entry", {
             method: "POST",
             headers: {
@@ -53,9 +43,7 @@ const dashBoard = () => {
                 userId: localStorage.getItem("authId"),
             })
         });
-
         const resData = await response.json();
-
         setProblemData([...problemData, resData]);
     };
 
@@ -66,9 +54,7 @@ const dashBoard = () => {
                     return entry;
                 }
             });
-    
             setProblemData(update);
-    
             await fetch(Server + "util/remove_entry", {
                 method: "POST",
                 headers: {
@@ -79,8 +65,6 @@ const dashBoard = () => {
                     entryId,
                 }),
             });
-
-
         } catch(err) {
             throw err;
         }

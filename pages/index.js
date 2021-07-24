@@ -1,23 +1,16 @@
 import { useState } from "react";
 import Head from 'next/head';
 import { useRouter } from "next/router";
-
-//Server
 import Server from "../config/Server";
-
-//Redux
 import { useDispatch } from "react-redux";
-//Reducers
-import { getUser } from "../store/actions/user";
+import { getUser } from "../services/modules/User/userSlice";
 
 const Index = () => {
   const dispatch = useDispatch();
-
   const router = useRouter();
-
+  //States
   const [email, setEmai] = useState();
   const [password, setPassword] = useState();
-
   //Handlers
   const loginHandler = async (e, path) => {
     try {
@@ -38,14 +31,8 @@ const Index = () => {
         alert(errData);
       } else {
         const resData = await response.json();
-
-        dispatch(getUser(resData.token, resData.result));
-
-        localStorage.setItem("authToken", resData.token);
-        localStorage.setItem("authId", resData.result._id);
-
+        dispatch(getUser({ token: resData.token, user: resData.result }));
         alert("Successfuly logged in");
-
         router.push("/dashboard");
       }
     } catch (err) {
@@ -63,7 +50,6 @@ const Index = () => {
         <title>Lean Idea</title>
       </Head>
       <h1>Lean Idea</h1>
-
       <input onChange={(e) => setEmai(e.target.value)}/>
       <input onChange={(e) => setPassword(e.target.value)}/>
       <button onClick={loginHandler}>Login</button>
