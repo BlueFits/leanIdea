@@ -59,7 +59,7 @@ const dashBoard = () => {
                 method: "POST",
                 headers: {
                     "Content-Type" : "application/json",
-                    'Accept': 'application/json',
+                    'Accept': 'app1lication/json',
                 },
                 body: JSON.stringify({
                     entryId,
