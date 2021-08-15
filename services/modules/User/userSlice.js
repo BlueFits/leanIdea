@@ -23,7 +23,6 @@ export const authUser = createAsyncThunk("user/authUser", async (data) => {
     });
 
     if (!response.ok) {
-      console.log("got here");
       const errData = await response.text();
       alert(errData);
     } else {
@@ -35,13 +34,43 @@ export const authUser = createAsyncThunk("user/authUser", async (data) => {
   }
 });
 
+export const getUser = createAsyncThunk("user/getUser", async (data) => {
+  try {
+    const response = await fetch(Server + "user/get_user?id=" + data, {
+      method: "GET",
+      headers: {
+        'Accept': 'application/json',
+        'Content-Type': 'application/json',
+        'Authorization': 'Bearer ' + localStorage.getItem("vToken"),
+      },
+    });
+
+    if (!response.ok) {
+      const errData = await response.text();
+      alert(errData);
+      window.location.href = "/";
+    } else {
+      const userData = await response.json();
+      return userData;
+    }
+  } catch (err) {
+    throw err;
+  }
+});
+
 const userSlice = createSlice({
   name: 'user',
   initialState,
   extraReducers: {
     [authUser.fulfilled]: (state, { payload }) => {
+      localStorage.setItem("vToken", payload.token);
+      localStorage.setItem("userID", payload.result._id);
       state.token = payload.token;
       state.user = payload.result;
+      window.location.href="/" + payload.result._id;
+    },
+    [getUser.fulfilled]: (state, { payload }) => {
+      state.user = payload;
     }
   },
 })

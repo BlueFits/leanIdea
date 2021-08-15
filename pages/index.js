@@ -1,21 +1,19 @@
 import { useState } from "react";
 import Head from 'next/head';
 import { useRouter } from "next/router";
-import { useDispatch } from "react-redux";
+import { useDispatch, useSelector } from "react-redux";
 import { authUser } from "../services/modules/User/userSlice";
 
 const Index = () => {
   const dispatch = useDispatch();
   const router = useRouter();
+  const userData = useSelector(state => state.user);
   //States
   const [email, setEmai] = useState();
   const [password, setPassword] = useState();
   //Handlers
-  const loginHandler = () => {
-    dispatch(authUser({ email, password }))
-    .then(() => {
-      router.push("/dashboard");
-    });
+  const loginHandler = async () => {
+    await dispatch(authUser({ email, password }));
   };
 
   const guestHandler = () => {
